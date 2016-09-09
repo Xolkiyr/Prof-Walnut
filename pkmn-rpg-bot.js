@@ -411,7 +411,7 @@ bot.on("message", msg => {
 	}
 	if (newmsg.includes("walnut") && newmsg.includes("help")){
 		var helping = {0:""};
-		if (msg.author.id = "166002128022667264"){
+		if (msg.author.id == "166002128022667264"){
 			var tname = "Prof Aubaris";
 		}else{
 			var tname = msg.author.name;
