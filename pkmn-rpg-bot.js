@@ -409,7 +409,7 @@ bot.on("message", msg => {
 		typemsg(msg.channel, "If you have any questions regarding myself or my creator, you can contact him directly. His name is " + bot.users.get("id",166002128022667264).username + ".\nHe has also been contacted in regards to your inquiry. Have a nice day trainer.\nI can try and help you but you must ask for my help.");
 		setTimeout(()=> {bot.users.get("id",166002128022667264).sendMessage("It seems that " + msg.author.username + " on " + msg.server.name + " is curious about the game. You should probably get around to explaining it to them.");}, 1000);
 	}
-	if (newmsg.includes("prof") && newmsg.includes("walnut") && newmsg.includes("help")){
+	if (newmsg.includes("help",newmsg.search("walnut")+7) && newmsg.includes("prof") && newmsg.includes("walnut",newmsg.search("prof")+3)){
 		var helping = {0:""};
 		if (msg.author.id == "166002128022667264"){
 			var tname = "Prof Aubaris";
