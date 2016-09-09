@@ -414,7 +414,7 @@ bot.on("message", msg => {
 		if (msg.author.id == "166002128022667264"){
 			var tname = "Prof Aubaris";
 		}else{
-			var tname = msg.author.name;
+			var tname = msg.author.username;
 		}
 		if(msg.mentions.users.size > 0){
 			helping[0] = msg.mentions.users[0]; 
