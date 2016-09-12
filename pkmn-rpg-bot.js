@@ -5,28 +5,13 @@ var bot = new Discord.Client();
 bot.on('error', console.error);
 var mysql = require("mysql"); // We need this for the database.
 var dateFormat = require('dateformat');
+var fs = require('fs');
 var settings = require("./settings.json"); // Grab all the settings.
 
 var dmg = 0; var R = 0; var BasePower = 0; var Atk = 0; var Def = 0; var Mod1 = 0;  var Mod3 = 0; var HP = 0; var Stat = 0;
 var Nat = 0; var stats = {HP:0,ATK:0,DEF:0,SATK:0,SDEF:0,SPD:0}; var IV = {HP:0,ATK:0,DEF:0,SATK:0,SDEF:0,SPD:0};
 var ngprog = {0:0}; var msgchk = {0:0}; var gender = {0:0}; var spkmn = {0:0}; var sname = {0:""}; var party = {0:""}; var i = 0;
 var regions = ["", "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola"];
-var nature = {
-	Adamant: [1.1,1,0.9,1,1], Bashful: [1,1,1,1,1], 
-	Bold: [1,1.1,1,1,0.9], Brave: [1.1,1,1,1,0.9], 
-	Calm: [0.9,1,1,1,1], Careful: [1,1,0.9,1.1,1], 
-	Docile: [1,1,1,1,1], Gentle: [1,0.9,1,1.1,1], 
-	Hardy: [1,1,1,1,1], Hasty: [1,0.9,1,1,1.1], 
-	Impish: [1,1.1,0.9,1,1], Jolly: [1,1,0.9,1,1.1], 
-	Lax: [1,1.1,1,0.9,1], Lonely: [1.1,0.9,1,1,1], 
-	Mild: [1,0.9,1.1,1,1], Modest: [0.9,1,1.1,1,1], 
-	Naive: [1,1,1,0.9,1.1], Naughty: [1.1,1,1,0.9,1], 
-	Quiet: [1,1,1.1,1,0.9], Quirky: [1,1,1,1,1], 
-	Rash: [1,1,1.1,0.9,1], Relaxed: [1,1.1,1,1,0.9], 
-	Sassy: [1,1,1,1.1,0.9], Serious: [1,1,1,1,1], 
-	Timid: [0.9,1,1,1,1.1]
-};
-var natureList = ["Adamant", "Bashful", "Bold", "Brave", "Calm", "Careful", "Docile", "Gentle", "Hardy", "Hasty", "Impish", "Jolly", "Lax", "Lonely", "Mild", "Modest", "Naive", "Naughty", "Quiet", "Quirky", "Rash", "Relaxed", "Sassy", "Serious", "Timid"];
 
 var dbconn = mysql.createPool({ // Create a connection to the database.
 	connectionLimit : 10,
@@ -36,47 +21,11 @@ var dbconn = mysql.createPool({ // Create a connection to the database.
     database: settings.db // Database (The database table).
 });
 
-//function dbc(){		Depreciated Function
-//	dbconn.connect(function(err) { // Create the connection.
-//		if (err) {
-//			console.log("Database connection failed: " + err); // Throw this to console if it errors.
-//		}
-//	});
-//}
-function dbinsert(query, post){
-	
-    dbconn.query(query, post, function(err, row) {
-		if (err) {
-			console.log(err); // Throws an error
-			return err;
-		} else {
-			return true;
-		}
-	});
-}
-function dbselect(query, post, chk=0){
-	
-    dbconn.query(query, post, function(err, row) {
-		if (err) {
-			console.log(err); // Throws an error
-			return err;
-		} else if(row.length) {
-			if(chk == 1){
-				return true;
-			}else{
-				return row;
-			}
-		} else {
-			return false;
-		}
-	});
-}
 function typemsg(msg, string){
 	msg.sendMessage(string);
 }
 function genPKMN(msg, dex, lv, callback){
 	if(lv >0 && lv <= 100 && !dex.NaN && !lv.NaN){
-		
 		dbconn.query('SELECT * FROM basestats WHERE pid = ? ',dex, function(err, row) {
             if (err) {
                 console.log(err); 
@@ -85,7 +34,6 @@ function genPKMN(msg, dex, lv, callback){
 				var NatFull = natureList[Math.floor(Math.random() * 24)];
 				Nat = nature[NatFull];
 				IV.HP = Math.floor((Math.random() * 31)); stats.HP = HPcalc(bs['hp'], IV.HP, 1, lv);
-				console.log(HPcalc(bs['hp'], IV.HP, 1, lv));
 				IV.ATK = Math.floor((Math.random() * 31)); stats.ATK = Statcalc(bs['atk'], IV.ATK, 1, lv, Nat[0]);
 				IV.DEF = Math.floor((Math.random() * 31)); stats.DEF = Statcalc(bs['def'], IV.DEF, 1, lv, Nat[1]);
 				IV.SATK = Math.floor((Math.random() * 31)); stats.SATK = Statcalc(bs['satk'], IV.SATK, 1, lv, Nat[2]);
@@ -106,7 +54,7 @@ function genPKMN(msg, dex, lv, callback){
 				console.log("Passed: " + pkmn);
 				callback(pkmn);
             } else { 
-				msg.channel.sendMessage("That pokemon does not exist.");
+				msg.sendMessage("That pokemon does not exist.");
 			}
 		});
 	}else{
@@ -146,9 +94,18 @@ function expCalc(gt, lv){
 	if(gt == "s"){ return 1.25*Math.pow(lv,3); }
 }
 
+bot.on("ready", () => {
+	bot.user.setAvatar(fs.readFileSync('./ProfWalnut-profile.png'));
+});
+
 bot.on("message", msg => {
 	if(msg.author.bot) return;
 	var newmsg = msg.content.toLowerCase();
+	if(msg.author.id == "166002128022667264"){ //Commands for Prof Aubaris !!ONLY!!
+		if(newmsg.startsWith("!update")){
+			
+		}
+	}
 	if (newmsg.startsWith("!ridebike")){
 		if(msg == msg.author){
 			usr.sendMessage( "Enjoy your bike ride.");
@@ -158,13 +115,13 @@ bot.on("message", msg => {
 	}
 	if (newmsg.startsWith("!serverinit")){
 		
-		dbconn.query('SELECT * FROM server WHERE sid = ? ', msg.server.id, function(err, row) { // Confirms the server isn't in the list.
+		dbconn.query('SELECT * FROM server WHERE sid = ? ', msg.guild.id, function(err, row) { // Confirms the server isn't in the list.
             if (err) {
                 console.log(err); // Throws an error
             } else if (row.length) { // Throws this to the server telling them they're already initialized.
                 msg.channel.sendMessage("Your server has already been initialized.");
             } else { // Adds them to the database.
-				var post  = {sid: msg.server.id, name: msg.server.name, oid: msg.server.owner.id};
+				var post  = {sid: msg.guild.id, name: msg.guild.name, oid: msg.guild.owner.id};
                 dbconn.query('INSERT INTO server SET ? ', post, function(err, row) {
 					if (err) {
 						console.log(err); // Throws an error
@@ -172,8 +129,8 @@ bot.on("message", msg => {
 						var d = new Date();
 						bot.channels.get("212249145568788480").sendMessage( 
 							dateFormat(d, "mmmm dS, yyyy, HH:MM:ss") + ":\n" + 
-							"Server " + msg.server.name + "(" + msg.server.id + ") added to the registry under the " + regions[1] + " Region.\n" + 
-							"Owner of the server is " + msg.server.owner.username);
+							"Server " + msg.guild.name + "(" + msg.guild.id + ") added to the registry under the " + regions[1] + " Region.\n" + 
+							"Owner of the server is " + msg.guild.owner.username);
 					}
 				});
 			}
@@ -235,7 +192,6 @@ bot.on("message", msg => {
 		msgchk[msg.author.id] = 1;
 	}
 	if (newmsg.startsWith("!party")){
-		
 		dbconn.query('SELECT * FROM tpkmn WHERE tid = ? ', msg.author.id, function(err, row) { // Confirms the user isn't registered.
 			console.log(row.length);
 			if (err) {
@@ -267,7 +223,7 @@ bot.on("message", msg => {
 			genPKMN(msg.channel, msg.content.split(" ")[1], msg.content.split(" ")[2]);
 		}
 		if(ngprog[msg.author.id] == 1 && !msgchk[msg.author.id]){
-			typemsg(msg.author, "Is that so? Then I'd like to welcome you to a brand new world.\nAs I'm sure you're aware, my name is Professor Walnut. People refer to me as a Pokemon Professor.\nBefore we go any further, I'd like to tell you a few things you should know about this world!\nThis world is widely inhabited by creatures known as Pokémon. We humans live alongside Pokémon as friends.\nAt times we play together, and at other times we work together. Some people use their Pokémon to battle and develop closer bonds with them.\nNow, why don't you tell me a little bit about yourself? Are you a boy? Or are you a girl?");
+			typemsg(msg.author, "Is that so? Then I'd like to welcome you to a brand new world.\nAs I'm sure you're aware, my name is Professor Brooke Walnut. People refer to me as a Pokemon Professor.\nBefore we go any further, I'd like to tell you a few things you should know about this world!\nThis world is widely inhabited by creatures known as Pokémon. We humans live alongside Pokémon as friends.\nAt times we play together, and at other times we work together. Some people use their Pokémon to battle and develop closer bonds with them.\nNow, why don't you tell me a little bit about yourself? Are you a boy? Or are you a girl?");
 			ngprog[msg.author.id] = 2;
 			msgchk[msg.author.id] = 1;
 		}
@@ -290,7 +246,7 @@ bot.on("message", msg => {
 				typemsg(msg.author, "Please, no spaces.");
 			}else{
 				if(msg.content.length > 32){
-					typemsg(msg.author, "I'm quite an old man, I'm not sure I could remember such a long name. Could you try something shorter?");
+					typemsg(msg.author, "I'm not sure I could remember such a long name. Could you try something shorter?");
 				}else{
 					
 					dbconn.query('SELECT * FROM users WHERE tname = ? ', msg.content, function(err, row) {
@@ -411,7 +367,7 @@ bot.on("message", msg => {
 	}
 	if (newmsg.includes("help",newmsg.search("walnut")+7) && newmsg.includes("prof") && newmsg.includes("walnut",newmsg.search("prof")+3)){
 		var helping = {0:""};
-		if (msg.author.id == "166002128022667264"){
+		if (msg.author.username == "Kael Aubaris"){
 			var tname = "Prof Aubaris";
 		}else{
 			var tname = msg.author.username;
@@ -430,7 +386,7 @@ bot.on("message", msg => {
 		var smsg = 
 			"Well " + tname + ", if " + helping[0] + " truly need help then I'm here to assist " + helping[1] + ".\n" + 
 			"If " + helping[2] + " haven't registered a Trainer ID yet, all " + helping[2] + " need to do is type the `!newgame` command. " + 
-			"If " + helping[2] + " got held up during `!newgame` but managed to give me " + helping[2] + "'re name, all " + helping[2] + " need is the `!continue` command. " + 
+			"If " + helping[2] + " got held up during `!newgame` but managed to give me " + helping[3] + " name, all " + helping[2] + " need is the `!continue` command. " + 
 			"If " + helping[2] + "'ve already gotten that far, then first let me congratulate " + helping[1] + " once more on beginning " + helping[3] + " Pokémon journey!\n\n" + 
 			"Once " + helping[2] + " have finished registering " + helping[3] + " Trainer ID and have chosen " + helping[3] + " first Pokémon " + helping[2] + " have the following commands at " + helping[3] + " disposal:\n\n" + 
 			"`!party` - This command shows " + helping[1] + " " + helping[3] + " currently active Pokémon\n\n" + 
@@ -438,7 +394,8 @@ bot.on("message", msg => {
 			"Other than that, if " + helping[2] + " have any further questions, please feel free to contact my associate Prof Aubaris(aka Kael Aubaris) with any further questions.";
 		typemsg(msg.channel, smsg);
 	}
-	if (newmsg.includes("night") && msg.author.id == "166002128022667264"){
+	if (newmsg.includes("night") && msg.author.username == "Kael Aubaris"){
+		console.log("UserID: " + msg.author.username);
 		typemsg(msg.channel, "Good night Professor Aubaris. Pleasant dreams.", 25);
 	}
 //	if (msg.author == bot.users.get("id", 208059868253388801) && newmsg.includes("has **arisen** from the ashes!")){
