@@ -13,6 +13,26 @@ var Nat = 0; var stats = {HP:0,ATK:0,DEF:0,SATK:0,SDEF:0,SPD:0}; var IV = {HP:0,
 var ngprog = {0:0}; var msgchk = {0:0}; var gender = {0:0}; var spkmn = {0:0}; var sname = {0:""}; var party = {0:""}; var i = 0;
 var regions = ["", "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola"];
 
+//Remove when Classes are done
+//Nature Alterations
+const nature = {
+	Adamant: [1.1,1,0.9,1,1], 	Bashful: [1,1,1,1,1], 		Bold: [1,1.1,1,1,0.9], 		Brave: [1.1,1,1,1,0.9], 
+	Calm: [0.9,1,1,1,1], 		Careful: [1,1,0.9,1.1,1], 	Docile: [1,1,1,1,1], 		Gentle: [1,0.9,1,1.1,1], 
+	Hardy: [1,1,1,1,1], 		Hasty: [1,0.9,1,1,1.1], 	Impish: [1,1.1,0.9,1,1], 	Jolly: [1,1,0.9,1,1.1], 
+	Lax: [1,1.1,1,0.9,1], 		Lonely: [1.1,0.9,1,1,1], 	Mild: [1,0.9,1.1,1,1], 		Modest: [0.9,1,1.1,1,1], 
+	Naive: [1,1,1,0.9,1.1], 	Naughty: [1.1,1,1,0.9,1], 	Quiet: [1,1,1.1,1,0.9], 	Quirky: [1,1,1,1,1], 
+	Rash: [1,1,1.1,0.9,1], 		Relaxed: [1,1.1,1,1,0.9], 	Sassy: [1,1,1,1.1,0.9], 	Serious: [1,1,1,1,1], 
+	Timid: [0.9,1,1,1,1.1]
+};
+//Available Natures
+const natureList = [
+	"Adamant", 	"Bashful", 	"Bold", 	"Brave", 	"Calm", 	"Careful", 	"Docile", 
+	"Gentle", 	"Hardy", 	"Hasty", 	"Impish", 	"Jolly", 	"Lax", 		"Lonely", 
+	"Mild", 	"Modest", 	"Naive", 	"Naughty", 	"Quiet", 	"Quirky", 	"Rash", 
+	"Relaxed", 	"Sassy", 	"Serious", 	"Timid"
+	];
+//Remove when Classes are done
+
 var dbconn = mysql.createPool({ // Create a connection to the database.
 	connectionLimit : 10,
     host: settings.host, // Database Host (Localhost for example).
@@ -54,7 +74,7 @@ function genPKMN(msg, dex, lv, callback){
 				console.log("Passed: " + pkmn);
 				callback(pkmn);
             } else { 
-				msg.sendMessage("That pokemon does not exist.");
+				msg.channel.sendMessage("That pokemon does not exist.");
 			}
 		});
 	}else{
@@ -100,10 +120,39 @@ bot.on("ready", () => {
 
 bot.on("message", msg => {
 	if(msg.author.bot) return;
+	var jw2s = 0;
 	var newmsg = msg.content.toLowerCase();
 	if(msg.author.id == "166002128022667264"){ //Commands for Prof Aubaris !!ONLY!!
 		if(newmsg.startsWith("!update")){
 			
+		}
+		if(newmsg.includes("introduce yourself") && newmsg.includes("prof") && newmsg.includes("walnut")){
+			msg.channel.sendMessage("Of course Prof Aubaris. My name is Professor Brooke Walnut. I'm in charge of the pokemon game that Prof Aubaris is working on. I also manage the active server list and the pokemon of every single trainer in the game.");
+			dbconn.query('SELECT * FROM users', function(err, row) {
+					if (err) {
+						console.log(err); // Throws an error
+					} else {
+						msg.channel.sendMessage("There are currently " + row.length + " active trainers in the game right now.");
+					}
+				});
+		}
+		if(newmsg.includes("prof") && newmsg.includes("walnut") && newmsg.includes("get some") && newmsg.includes("sleep") && bot.user.status != "idle"){
+			msg.channel.sendMessage("***yawns*** You're probably right. Night everyone. :wave:");
+			bot.user.setStatus('idle');
+			var jw2s = 1;
+		}
+		if(newmsg.includes("prof") && newmsg.includes("walnut") && bot.user.status == "idle" && jw2s == 0){
+			msg.channel.sendMessage("I'm up, I'm up... Whatcha need?");
+			bot.user.setStatus('online');
+		}
+	}
+	if(bot.user.status == "idle") return;
+	if(msg.author.id == "97522048506556416"){
+		if((newmsg.includes("😈") && newmsg.includes("🍆") && newmsg.includes("👌")) || newmsg.includes("😘")){
+			msg.channel.sendMessage("***backs away slowly*** :fearful:");
+		}
+		if(newmsg.includes("bby")){
+			msg.channel.sendMessage("Don't make me get out my pepper spray.");
 		}
 	}
 	if (newmsg.startsWith("!ridebike")){
@@ -126,6 +175,7 @@ bot.on("message", msg => {
 					if (err) {
 						console.log(err); // Throws an error
 					} else {
+						msg.channel.sendMessage("Your server has been initialized.");
 						var d = new Date();
 						bot.channels.get("212249145568788480").sendMessage( 
 							dateFormat(d, "mmmm dS, yyyy, HH:MM:ss") + ":\n" + 
@@ -342,7 +392,7 @@ bot.on("message", msg => {
 							console.log(err); // Throws an error
 						} else {
 							var d = new Date();
-							bot.channels.get("212249145568788480").sendMessage( 
+							bot.channels.get("212249145568788480").sendMessage(
 								dateFormat(d, "mmmm dS, yyyy, HH:MM:ss") + ":\n" + 
 								"Trainer " + msg.author.username + " chose their starter Pokémon from Prof Walnut.\n" + 
 								"They chose " + sname[msg.author.id] + ".");
@@ -373,7 +423,7 @@ bot.on("message", msg => {
 			var tname = msg.author.username;
 		}
 		if(msg.mentions.users.size > 0){
-			helping[0] = msg.mentions.users[0]; 
+			helping[0] = msg.mentions.users.array().join(", "); 
 			helping[1] = "them";
 			helping[2] = "they";
 			helping[3] = "their"
@@ -394,8 +444,7 @@ bot.on("message", msg => {
 			"Other than that, if " + helping[2] + " have any further questions, please feel free to contact my associate Prof Aubaris(aka Kael Aubaris) with any further questions.";
 		typemsg(msg.channel, smsg);
 	}
-	if (newmsg.includes("night") && msg.author.username == "Kael Aubaris"){
-		console.log("UserID: " + msg.author.username);
+	if (newmsg.includes("night") && newmsg.includes("bed") && msg.author.username == "Kael Aubaris"){
 		typemsg(msg.channel, "Good night Professor Aubaris. Pleasant dreams.", 25);
 	}
 //	if (msg.author == bot.users.get("id", 208059868253388801) && newmsg.includes("has **arisen** from the ashes!")){
