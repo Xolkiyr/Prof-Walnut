@@ -6,6 +6,8 @@ bot.on('error', console.error);
 var mysql = require("mysql"); // We need this for the database.
 var dateFormat = require('dateformat');
 var fs = require('fs');
+var pokemon = require("./prof_walnut/pokemon.js");
+require("./prof_walnut/functions.js");
 var settings = require("./settings.json"); // Grab all the settings.
 
 var dmg = 0; var R = 0; var BasePower = 0; var Atk = 0; var Def = 0; var Mod1 = 0;  var Mod3 = 0; var HP = 0; var Stat = 0;
@@ -82,38 +84,6 @@ function genPKMN(msg, dex, lv, callback){
 	}
 }
 
-function dmgcalc(Lv, BP, Atk, Def, Mod1, CH, Mod2=1, STAB, T1, T2, Mod3){
-	R = 100-Math.floor((Math.random() * 15) + 1);
-	dmg = Math.floor(Math.floor((Math.floor(Math.floor(Math.floor(Math.floor(Math.floor(Lv*2/5) + 2)*BP*Atk/50)/Def)*Mod1) + 2)*CH*Mod2*R/100)*STAB*T1*T2*Mod3);
-}
-function basepower(HH=1, BP, IT=1, CHG=1, MS=1, WS=1, UA=1, FA=1){
-	BasePower = Math.floor(Math.floor(Math.floor(Math.floor(Math.floor(Math.floor(Math.floor(HH*BP)*IT)*CHG)*MS)*WS)*UA)*FA);
-}
-function atkcalc(Stat, SM, AM=1, IM=1){
-	Atk = Stat*SM*AM*IM;
-}
-function defcalc(Stat, SM, Mod, SX){
-	Def = Stat*SM*Mod*SX;
-}
-function Mod1calc(BRN=1, RL=1, TVT=1, SR=1, FF=1){
-	Mod1 = BRN*RL*TVT*SR*FF;
-}
-function Mod2calc(SRF, EB, TL, TRB){
-	Mod3 = SRF*EB*TL*TRB;
-}
-function HPcalc(BaseStat, IV, EV, Level){
-	return Math.floor((2*BaseStat+IV+(EV/4))*Level/100+Level+10);
-}
-function Statcalc(BaseStat, IV, EV, Level, Nature){
-	return Math.floor(((2*BaseStat+IV+(EV/4))*Level/100+5)*Nature);
-}
-function expCalc(gt, lv){
-	if(gt == "f"){ return 0.8*Math.pow(lv,3); }
-	if(gt == "mf"){ return Math.pow(lv,3); }
-	if(gt == "ms"){ return (1.2*Math.pow(lv,3)) - (15 * Math.pow(lv,2))+(100 * lv) - 140; }
-	if(gt == "s"){ return 1.25*Math.pow(lv,3); }
-}
-
 bot.on("ready", () => {
 	bot.user.setAvatar(fs.readFileSync('./ProfWalnut-profile.png'));
 });
@@ -124,17 +94,39 @@ bot.on("message", msg => {
 	var newmsg = msg.content.toLowerCase();
 	if(msg.author.id == "166002128022667264"){ //Commands for Prof Aubaris !!ONLY!!
 		if(newmsg.startsWith("!check")){
-			arg = msg.content.split(" ");
+			var tname = msg.content.split(" ")[2];
+			var tspecies = msg.content.split(" ")[3];
+			var tlv = msg.content.split(" ")[4];
+			console.log("name: " + tname + "; species: " + tspecies + "; Lv: " + tlv);
+			var tpkmn = new pokemon(tname, tspecies, tlv);
+			msg.author.sendMessage(
+				"Name: " + tpkmn.name + " Lv. " + tpkmn.lv + "\n" + 
+				tpkmn.dex + " " + tpkmn.species + "\n" + 
+				"__**Base Stats(*IV*)**__\n" + 
+				"HP: " + tpkmn.bs[0] + "(" + tpkmn.ivs.hp + ")" + 
+				"HP: " + tpkmn.bs[1] + "(" + tpkmn.ivs.atk + ")" + 
+				"HP: " + tpkmn.bs[2] + "(" + tpkmn.ivs.def + ")" + 
+				"HP: " + tpkmn.bs[3] + "(" + tpkmn.ivs.satk + ")" + 
+				"HP: " + tpkmn.bs[4] + "(" + tpkmn.ivs.sdef + ")" + 
+				"HP: " + tpkmn.bs[5] + "(" + tpkmn.ivs.spd + ")"
+			);
 		}
 		if(newmsg.includes("introduce yourself") && newmsg.includes("prof") && newmsg.includes("walnut")){
 			msg.channel.sendMessage("Of course Prof Aubaris. My name is Professor Brooke Walnut. I'm in charge of the pokemon game that Prof Aubaris is working on. I also manage the active server list and the pokemon of every single trainer in the game.");
 			dbconn.query('SELECT * FROM users', function(err, row) {
-					if (err) {
-						console.log(err); // Throws an error
-					} else {
-						msg.channel.sendMessage("There are currently " + row.length + " active trainers in the game right now.");
-					}
-				});
+				if (err) {
+					console.log(err); // Throws an error
+				} else {
+					msg.channel.sendMessage("There are currently " + row.length + " active trainers in the game right now.");
+					dbconn.query('SELECT * FROM server', function(err, row) {
+						if (err) {
+							console.log(err); // Throws an error
+						} else {
+							msg.channel.sendMessage("There are currently " + row.length + " active servers hosting the game right now.");
+						}
+					});
+				}
+			});
 		}
 		if(newmsg.includes("prof") && newmsg.includes("walnut") && newmsg.includes("get some") && newmsg.includes("sleep") && bot.user.status != "idle"){
 			msg.channel.sendMessage("***yawns*** You're probably right. Night everyone. :wave:");
@@ -146,7 +138,12 @@ bot.on("message", msg => {
 			bot.user.setStatus('online');
 		}
 	}
-	if(bot.user.status == "idle") return;
+	if(bot.user.status == "idle"){
+		if(newmsg.startsWith("!serverinit") || newmsg.startsWith("!newgame") || newmsg.startsWith("!continue") || newmsg.startsWith("!party")){
+			msg.author.sendMessage(":zzz:\n\nThis is an automated message. It seems like I've fallen asleep. If you need anything, please contact Prof Aubaris.");
+		}
+		return;
+	}
 	if(msg.author.id == "97522048506556416"){
 		if((newmsg.includes("😈") && newmsg.includes("🍆") && newmsg.includes("👌")) || newmsg.includes("😘")){
 			msg.channel.sendMessage("***backs away slowly*** :fearful:");
@@ -423,7 +420,8 @@ bot.on("message", msg => {
 			var tname = msg.author.username;
 		}
 		if(msg.mentions.users.size > 0){
-			helping[0] = msg.mentions.users.array().join(", "); 
+			helping[0] = msg.mentions.users.array().join(", ");
+			helping[0] = helping[0].replace(/,(?![\s\S]*,)/, ' and');
 			helping[1] = "them";
 			helping[2] = "they";
 			helping[3] = "their"
@@ -455,11 +453,11 @@ bot.on("message", msg => {
 			"       - Shows you your trainer badge.\n" + 
 			"         If done within a server, it'll also show you what gym badges you've gotten in this server.\n" + 
 			"   `!challenge @mention <gym>`\n" + 
-			"       - (WiP)This command allows you to challenge another trainer.\n" + 
+			"       - **(WiP)**This command allows you to challenge another trainer.\n" + 
 			"         If the gym tag is used at the end, it will attempt to challenge them for a gym badge.\n" + 
 			"         It will give you an error if the user is not a Gym Leader.\n" + 
 			"   `!tallgrass [location]`\n" + 
-			"       - (WiP)This allows you to attempt to catch a wild Pokémon.\n" + 
+			"       - **(WiP)**This allows you to attempt to catch a wild Pokémon.\n" + 
 			"          Possible locations: city, forest, field, mountain, cave, abandoned building\n\n" + 
 			"Server owners also have these commands:\n" + 
 			"   `!serverinit`\n" + 
