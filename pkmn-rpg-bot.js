@@ -123,8 +123,8 @@ bot.on("message", msg => {
 	var jw2s = 0;
 	var newmsg = msg.content.toLowerCase();
 	if(msg.author.id == "166002128022667264"){ //Commands for Prof Aubaris !!ONLY!!
-		if(newmsg.startsWith("!update")){
-			
+		if(newmsg.startsWith("!check")){
+			arg = msg.content.split(" ");
 		}
 		if(newmsg.includes("introduce yourself") && newmsg.includes("prof") && newmsg.includes("walnut")){
 			msg.channel.sendMessage("Of course Prof Aubaris. My name is Professor Brooke Walnut. I'm in charge of the pokemon game that Prof Aubaris is working on. I also manage the active server list and the pokemon of every single trainer in the game.");
@@ -443,6 +443,29 @@ bot.on("message", msg => {
 			"If " + helping[2] + "'re the server owner and " + helping[2] + " haven't registered " + helping[3] + " server, please do so with the `!serverinit` command.\n\n" + 
 			"Other than that, if " + helping[2] + " have any further questions, please feel free to contact my associate Prof Aubaris(aka Kael Aubaris) with any further questions.";
 		typemsg(msg.channel, smsg);
+	}
+	if(newmsg.includes("prof") && newmsg.includes("walnut") && newmsg.includes("how") && (newmsg.includes("do") || newmsg.includes("would")) && newmsg.includes("play")){
+		typemsg(msg.channel, 
+			"To play the game, you first have to start a `!newgame` to initiate the Trainer Registration.\n" + 
+			"If you get interrupted during the trainer registration proccess, use the `!continue` command to select your starting Pokémon.\n\n" + 
+			"Once you've registered your trainer ID and chosen your first Pokémon, you can use the following commands:\n" + 
+			"   `!party`\n" + 
+			"		- Allows you to see your current team of Pokémon.\n" + 
+			"   `!badge`\n" + 
+			"       - Shows you your trainer badge.\n" + 
+			"         If done within a server, it'll also show you what gym badges you've gotten in this server.\n" + 
+			"   `!challenge @mention <gym>`\n" + 
+			"       - (WiP)This command allows you to challenge another trainer.\n" + 
+			"         If the gym tag is used at the end, it will attempt to challenge them for a gym badge.\n" + 
+			"         It will give you an error if the user is not a Gym Leader.\n" + 
+			"   `!tallgrass [location]`\n" + 
+			"       - (WiP)This allows you to attempt to catch a wild Pokémon.\n" + 
+			"          Possible locations: city, forest, field, mountain, cave, abandoned building\n\n" + 
+			"Server owners also have these commands:\n" + 
+			"   `!serverinit`\n" + 
+			"       - This allows server owner to initialize their server for they own.\n" + 
+			"         It will allow for customization of the server environment later on."
+		);
 	}
 	if (newmsg.includes("night") && newmsg.includes("bed") && msg.author.username == "Kael Aubaris"){
 		typemsg(msg.channel, "Good night Professor Aubaris. Pleasant dreams.", 25);
