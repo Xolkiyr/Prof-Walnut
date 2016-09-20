@@ -1,0 +1,16 @@
+{
+	"ServerID":
+	{
+		"name": "Name of the server",
+		"region": 1,
+		"owner": "ownerID",
+		"gyms":{
+			"GymLeaderID":
+			{
+				"gymname": "Gym Name",
+				"badge": "Badge Name"
+			}
+		},
+		"leaguechamp": "League Champion ID"
+	}
+}

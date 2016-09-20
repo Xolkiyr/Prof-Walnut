@@ -1,0 +1,32 @@
+{
+	"DiscordUserID":
+	{
+		"PokemonID":
+		{
+			"name": "Nickname",
+			"pid": 0,
+			"species": "Species",
+			"ot": "Original Trainer's ID",
+			"bid": 0,
+			"types":
+			{
+				1: "Type1",
+				2: "Type2"
+			},
+			"level": 1,
+			"exp": 0,
+			"stats": {"chp": 0, "mhp": 0, "atk": 0, "def": 0, "satk": 0, "sdef": 0, "spd": 0},
+			"ivs": {"hp": 0, "atk": 0, "def": 0, "satk": 0, "sdef": 0, "spd": 0},
+			"ability": "AbilityID",
+			"status":
+			{
+				"StatusID": 0
+			}
+			"item": "ItemID",
+			"moves":
+			{
+				"MoveID": {"cpp": 20,"mcp": 20}
+			}
+		}
+	}
+}

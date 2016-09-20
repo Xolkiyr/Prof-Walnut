@@ -1,0 +1,16 @@
+{
+	"DiscordUserID":
+	{
+		"nickname": "Trainer's Nickame",
+		"title": "Trainer's Title",
+		"money": 500,
+		"joined": 0,
+		"badges":
+		{
+			"ServerID":
+			{
+				"GymLeaderID": "true/false"
+			}
+		}
+	}
+}
