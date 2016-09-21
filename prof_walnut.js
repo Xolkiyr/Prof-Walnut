@@ -7,25 +7,27 @@ var mysql = require("mysql"); // We need this for the database.
 var dateFormat = require('dateformat');
 var fs = require('fs');
 var settings = require("./settings.json"); // Grab all the settings.
-var tools = require('./prof_walnut/functions.js');
+//var tools = require('./prof_walnut/functions.js');
+
+var i = 0;
 
 //Functions for loading and saving the trainer object.
 function load_trainers(){ //Load the trainer list to the trainer object
-	var trainers = JSON.parse(require("./prof_walnut/trainers.json"));
+	var trainers = require("./prof_walnut/trainers.json");
 }
 function save_trainers(trainers){
 	fs.writeFile("./prof_walnut/trainers.json", JSON.stringify(trainer), function (err) { });
 }
 //Functions for loading and saving the Pokemon Teams object.
 function load_teams(){ //Load the Teams list to the teams object
-	var teams = JSON.parse(require("./prof_walnut/teams.json"));
+	var teams = require("./prof_walnut/teams.json");
 }
 function save_teams(teams){
 	fs.writeFile("./prof_walnut/teams.json", JSON.stringify(teams), function (err) { });
 }
 //Functions for loading and saving Server List Object.
 function load_servers(){ //Load the server list to the server object
-	var servers = JSON.parse(require("./prof_walnut/servers.json"));
+	var servers = require("./prof_walnut/servers.json");
 }
 function save_servers(servers){
 	fs.writeFile("./prof_walnut/servers.json", JSON.stringify(servers), function (err) { });
