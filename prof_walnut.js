@@ -27,7 +27,7 @@ function save_teams(teams){
 function load_servers(){ //Load the server list to the server object
 	var servers = JSON.parse(require("./prof_walnut/servers.json"));
 }
-function save_teams(servers){
+function save_servers(servers){
 	fs.writeFile("./prof_walnut/servers.json", JSON.stringify(servers), function (err) { });
 }
 

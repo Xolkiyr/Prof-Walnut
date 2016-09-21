@@ -10,8 +10,8 @@
 			"bid": 0,
 			"types":
 			{
-				1: "Type1",
-				2: "Type2"
+				"1": "Type1",
+				"2": "Type2"
 			},
 			"level": 1,
 			"exp": 0,
@@ -21,7 +21,7 @@
 			"status":
 			{
 				"StatusID": 0
-			}
+			},
 			"item": "ItemID",
 			"moves":
 			{
